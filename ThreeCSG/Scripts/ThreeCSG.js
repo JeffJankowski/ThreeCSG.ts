@@ -279,42 +279,46 @@ var ThreeCSG;
         return Node;
     })();
     var ThreeBSP = (function () {
-        function ThreeBSP(geometry) {
+        function ThreeBSP(input) {
             // Convert THREE.Geometry to ThreeBSP
-            var i, _length_i, face, vertex, faceVertexUvs, uvs, polygon, polygons = [], tree;
-            if (geometry instanceof THREE.Geometry)
+            var geometry;
+            if (input instanceof THREE.Geometry) {
                 this.matrix = new THREE.Matrix4;
-            else if (geometry instanceof THREE.Mesh) {
-                // #todo: add hierarchy support
-                geometry.updateMatrix();
-                this.matrix = geometry.matrix.clone();
-                geometry = geometry.geometry;
+                geometry = input;
             }
-            else if (geometry instanceof Node) {
-                this.tree = geometry;
+            else if (input instanceof THREE.Mesh) {
+                // #todo: add hierarchy support
+                var mesh = input;
+                mesh.updateMatrix();
+                this.matrix = mesh.matrix.clone();
+                geometry = mesh.geometry;
+            }
+            else if (input instanceof Node) {
+                this.tree = input;
                 this.matrix = new THREE.Matrix4;
                 return this;
             }
             else
-                throw 'ThreeBSP: Given geometry is unsupported';
-            for (i = 0, _length_i = geometry.faces.length; i < _length_i; i++) {
-                face = geometry.faces[i];
-                faceVertexUvs = geometry.faceVertexUvs[0][i];
-                polygon = new Polygon;
+                throw 'ThreeBSP: Given input is unsupported';
+            var polygons = [];
+            for (var i = 0; i < geometry.faces.length; i++) {
+                var face = geometry.faces[i];
+                var faceVertexUvs = geometry.faceVertexUvs[0][i];
+                var polygon = new Polygon;
                 if (face instanceof THREE.Face3) {
-                    vertex = geometry.vertices[face.a];
-                    uvs = faceVertexUvs ? new THREE.Vector2(faceVertexUvs[0].x, faceVertexUvs[0].y) : null;
-                    vertex = new Vertex(vertex.x, vertex.y, vertex.z, face.vertexNormals[0], uvs);
+                    var v3 = geometry.vertices[face.a];
+                    var uvs = faceVertexUvs ? new THREE.Vector2(faceVertexUvs[0].x, faceVertexUvs[0].y) : null;
+                    var vertex = new Vertex(v3.x, v3.y, v3.z, face.vertexNormals[0], uvs);
                     vertex.applyMatrix4(this.matrix);
                     polygon.vertices.push(vertex);
-                    vertex = geometry.vertices[face.b];
+                    v3 = geometry.vertices[face.b];
                     uvs = faceVertexUvs ? new THREE.Vector2(faceVertexUvs[1].x, faceVertexUvs[1].y) : null;
-                    vertex = new Vertex(vertex.x, vertex.y, vertex.z, face.vertexNormals[1], uvs);
+                    vertex = new Vertex(v3.x, v3.y, v3.z, face.vertexNormals[1], uvs);
                     vertex.applyMatrix4(this.matrix);
                     polygon.vertices.push(vertex);
-                    vertex = geometry.vertices[face.c];
+                    v3 = geometry.vertices[face.c];
                     uvs = faceVertexUvs ? new THREE.Vector2(faceVertexUvs[2].x, faceVertexUvs[2].y) : null;
-                    vertex = new Vertex(vertex.x, vertex.y, vertex.z, face.vertexNormals[2], uvs);
+                    vertex = new Vertex(v3.x, v3.y, v3.z, face.vertexNormals[2], uvs);
                     vertex.applyMatrix4(this.matrix);
                     polygon.vertices.push(vertex);
                 }
